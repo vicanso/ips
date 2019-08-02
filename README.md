@@ -1,5 +1,7 @@
 # ips
 
+[![Build Status](https://img.shields.io/travis/vicanso/ips.svg?label=linux+build)](https://travis-ci.org/vicanso/ips)
+
 Check ip is exists in iplist.
 
 ## API
