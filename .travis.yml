@@ -6,4 +6,4 @@ go:
   - master
 
 script:
-  - env GO111MODULE=on make test && make bench
+  - env GO111MODULE=on make test
