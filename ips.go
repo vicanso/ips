@@ -37,43 +37,43 @@ func New() *IPS {
 	}
 }
 
-// Exists check the ip exists
-func (iPS *IPS) Exists(ip string) (exists bool) {
-	if iPS.Mutex != nil {
-		iPS.Mutex.RLock()
-		defer iPS.Mutex.RUnlock()
+// Contains contains the ip
+func (ips *IPS) Contains(ip string) bool {
+	if ips.Mutex != nil {
+		ips.Mutex.RLock()
+		defer ips.Mutex.RUnlock()
 	}
 	currentIP := net.ParseIP(ip)
-	for _, value := range iPS.IPList {
+	for _, value := range ips.IPList {
 		if currentIP.Equal(value) {
 			return true
 		}
 	}
-	for _, ipNet := range iPS.IPNetList {
+	for _, ipNet := range ips.IPNetList {
 		if ipNet.Contains(currentIP) {
 			return true
 		}
 	}
-	return
+	return false
 }
 
 // Add add ip to list
-func (iPS *IPS) Add(ip string) (err error) {
-	if iPS.Mutex != nil {
-		iPS.Mutex.Lock()
-		defer iPS.Mutex.Unlock()
+func (ips *IPS) Add(ip string) (err error) {
+	if ips.Mutex != nil {
+		ips.Mutex.Lock()
+		defer ips.Mutex.Unlock()
 	}
 	// IPNet
-	if strings.Index(ip, "/") != -1 {
+	if strings.Contains(ip, "/") {
 		_, ipNet, err := net.ParseCIDR(ip)
 		if err != nil {
 			return err
 		}
-		iPS.IPNetList = append(iPS.IPNetList, ipNet)
+		ips.IPNetList = append(ips.IPNetList, ipNet)
 	}
 	value := net.ParseIP(ip)
 	if value != nil {
-		iPS.IPList = append(iPS.IPList, value)
+		ips.IPList = append(ips.IPList, value)
 	}
 	return
 }
