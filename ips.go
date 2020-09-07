@@ -31,6 +31,12 @@ type (
 
 // New create a new ips
 func New() *IPS {
+	ips := NewWithoutMutex()
+	ips.Mutex = new(sync.RWMutex)
+	return ips
+}
+
+func NewWithoutMutex() *IPS {
 	return &IPS{
 		IPList:    make([]net.IP, 0),
 		IPNetList: make([]*net.IPNet, 0),
