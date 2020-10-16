@@ -32,7 +32,7 @@ type (
 // New create a new ips
 func New() *IPS {
 	ips := NewWithoutMutex()
-	ips.Mutex = new(sync.RWMutex)
+	ips.Mutex = &sync.RWMutex{}
 	return ips
 }
 
@@ -44,42 +44,46 @@ func NewWithoutMutex() *IPS {
 }
 
 // Contains contains the ip
-func (ips *IPS) Contains(ip string) bool {
+func (ips *IPS) Contains(ipList ...string) bool {
 	if ips.Mutex != nil {
 		ips.Mutex.RLock()
 		defer ips.Mutex.RUnlock()
 	}
-	currentIP := net.ParseIP(ip)
-	for _, value := range ips.IPList {
-		if currentIP.Equal(value) {
-			return true
+	for _, ip := range ipList {
+		currentIP := net.ParseIP(ip)
+		for _, value := range ips.IPList {
+			if currentIP.Equal(value) {
+				return true
+			}
 		}
-	}
-	for _, ipNet := range ips.IPNetList {
-		if ipNet.Contains(currentIP) {
-			return true
+		for _, ipNet := range ips.IPNetList {
+			if ipNet.Contains(currentIP) {
+				return true
+			}
 		}
 	}
 	return false
 }
 
 // Add add ip to list
-func (ips *IPS) Add(ip string) (err error) {
+func (ips *IPS) Add(ipList ...string) (err error) {
 	if ips.Mutex != nil {
 		ips.Mutex.Lock()
 		defer ips.Mutex.Unlock()
 	}
-	// IPNet
-	if strings.Contains(ip, "/") {
-		_, ipNet, err := net.ParseCIDR(ip)
-		if err != nil {
-			return err
+	for _, ip := range ipList {
+		// IPNet
+		if strings.Contains(ip, "/") {
+			_, ipNet, err := net.ParseCIDR(ip)
+			if err != nil {
+				return err
+			}
+			ips.IPNetList = append(ips.IPNetList, ipNet)
 		}
-		ips.IPNetList = append(ips.IPNetList, ipNet)
-	}
-	value := net.ParseIP(ip)
-	if value != nil {
-		ips.IPList = append(ips.IPList, value)
+		value := net.ParseIP(ip)
+		if value != nil {
+			ips.IPList = append(ips.IPList, value)
+		}
 	}
 	return
 }
