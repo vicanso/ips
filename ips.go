@@ -38,10 +38,9 @@ func New() *IPS {
 
 // NewWithoutMutex return a new ips without mutex
 func NewWithoutMutex() *IPS {
-	return &IPS{
-		IPList:    make([]net.IP, 0),
-		IPNetList: make([]*net.IPNet, 0),
-	}
+	ips := &IPS{}
+	ips.reset()
+	return ips
 }
 
 // Contains returns true if contains any of ip
@@ -66,12 +65,31 @@ func (ips *IPS) Contains(ipList ...string) bool {
 	return false
 }
 
-// Add adds ip to list
-func (ips *IPS) Add(ipList ...string) (err error) {
+func (ips *IPS) reset() {
+	ips.IPList = make([]net.IP, 0)
+	ips.IPNetList = make([]*net.IPNet, 0)
+}
+
+// Reset cleans all ip data
+func (ips *IPS) Reset() {
 	if ips.Mutex != nil {
 		ips.Mutex.Lock()
 		defer ips.Mutex.Unlock()
 	}
+	ips.reset()
+}
+
+// Replace cleans all ip data and add new ip data
+func (ips *IPS) Replace(ipList ...string) (err error) {
+	if ips.Mutex != nil {
+		ips.Mutex.Lock()
+		defer ips.Mutex.Unlock()
+	}
+	ips.reset()
+	return ips.add(ipList)
+}
+
+func (ips *IPS) add(ipList []string) (err error) {
 	for _, ip := range ipList {
 		// IPNet
 		if strings.Contains(ip, "/") {
@@ -87,6 +105,15 @@ func (ips *IPS) Add(ipList ...string) (err error) {
 		}
 	}
 	return
+}
+
+// Add adds ip to list
+func (ips *IPS) Add(ipList ...string) (err error) {
+	if ips.Mutex != nil {
+		ips.Mutex.Lock()
+		defer ips.Mutex.Unlock()
+	}
+	return ips.add(ipList)
 }
 
 // Strings retruns string slice of ips

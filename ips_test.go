@@ -40,4 +40,12 @@ func TestIPS(t *testing.T) {
 		"12.12.12.13",
 		"192.168.1.0/24",
 	}, ips.Strings())
+
+	assert.Nil(ips.Replace("1.1.1.1"))
+	assert.Equal([]string{
+		"1.1.1.1",
+	}, ips.Strings())
+
+	ips.Reset()
+	assert.Empty(ips.Strings())
 }
