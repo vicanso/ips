@@ -29,13 +29,14 @@ type (
 	}
 )
 
-// New create a new ips
+// New return a new ips with mutex
 func New() *IPS {
 	ips := NewWithoutMutex()
 	ips.Mutex = &sync.RWMutex{}
 	return ips
 }
 
+// NewWithoutMutex return a new ips without mutex
 func NewWithoutMutex() *IPS {
 	return &IPS{
 		IPList:    make([]net.IP, 0),
@@ -43,7 +44,7 @@ func NewWithoutMutex() *IPS {
 	}
 }
 
-// Contains contains the ip
+// Contains returns true if contains any of ip
 func (ips *IPS) Contains(ipList ...string) bool {
 	if ips.Mutex != nil {
 		ips.Mutex.RLock()
@@ -65,7 +66,7 @@ func (ips *IPS) Contains(ipList ...string) bool {
 	return false
 }
 
-// Add add ip to list
+// Add adds ip to list
 func (ips *IPS) Add(ipList ...string) (err error) {
 	if ips.Mutex != nil {
 		ips.Mutex.Lock()
@@ -86,4 +87,23 @@ func (ips *IPS) Add(ipList ...string) (err error) {
 		}
 	}
 	return
+}
+
+// Strings retruns string slice of ips
+func (ips *IPS) Strings() []string {
+	if ips.Mutex != nil {
+		ips.Mutex.RLock()
+		defer ips.Mutex.RUnlock()
+	}
+	arr := make([]string, len(ips.IPList)+len(ips.IPNetList))
+	index := 0
+	for _, value := range ips.IPList {
+		arr[index] = value.String()
+		index++
+	}
+	for _, ipNet := range ips.IPNetList {
+		arr[index] = ipNet.String()
+		index++
+	}
+	return arr
 }

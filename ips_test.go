@@ -23,15 +23,21 @@ import (
 
 func TestIPS(t *testing.T) {
 	assert := assert.New(t)
-	iPs := New()
-	iPs.Mutex = new(sync.RWMutex)
-	_ = iPs.Add("12.12.12.12")
-	_ = iPs.Add("12.12.12.13", "192.168.1.1/24")
-	assert.True(iPs.Contains("12.12.12.12"))
-	assert.True(iPs.Contains("12.12.12.13"))
-	assert.False(iPs.Contains("12.12.12.14"))
+	ips := New()
+	ips.Mutex = new(sync.RWMutex)
+	_ = ips.Add("12.12.12.12")
+	_ = ips.Add("12.12.12.13", "192.168.1.1/24")
+	assert.True(ips.Contains("12.12.12.12"))
+	assert.True(ips.Contains("12.12.12.13"))
+	assert.False(ips.Contains("12.12.12.14"))
 
-	assert.True(iPs.Contains("192.168.1.1"))
-	assert.True(iPs.Contains("192.168.1.2"))
-	assert.False(iPs.Contains("192.168.2.1"))
+	assert.True(ips.Contains("192.168.1.1"))
+	assert.True(ips.Contains("192.168.1.2"))
+	assert.False(ips.Contains("192.168.2.1"))
+
+	assert.Equal([]string{
+		"12.12.12.12",
+		"12.12.12.13",
+		"192.168.1.0/24",
+	}, ips.Strings())
 }
